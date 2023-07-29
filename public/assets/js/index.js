@@ -3,6 +3,9 @@ let noteText;
 let saveNoteBtn;
 let newNoteBtn;
 let noteList;
+let pixelGrid;
+let mouseDown = false;
+let drawMode = 'draw';
 
 if (window.location.pathname === '/notes') {
   noteTitle = document.querySelector('.note-title');
@@ -10,6 +13,7 @@ if (window.location.pathname === '/notes') {
   saveNoteBtn = document.querySelector('.save-note');
   newNoteBtn = document.querySelector('.new-note');
   noteList = document.querySelectorAll('.list-container .list-group');
+  pixelGrid = document.querySelector('.pixel-grid');
 }
 
 // Show an element
@@ -58,11 +62,13 @@ const renderActiveNote = () => {
     noteText.setAttribute('readonly', true);
     noteTitle.value = activeNote.title;
     noteText.value = activeNote.text;
+    renderPixelGrid(activeNote.mask);
   } else {
     noteTitle.removeAttribute('readonly');
     noteText.removeAttribute('readonly');
     noteTitle.value = '';
     noteText.value = '';
+    renderPixelGrid();
   }
 };
 
@@ -70,6 +76,7 @@ const handleNoteSave = () => {
   const newNote = {
     title: noteTitle.value,
     text: noteText.value,
+    mask: getPixelMask()
   };
   saveNote(newNote).then(() => {
     getAndRenderNotes();
@@ -170,6 +177,55 @@ const renderNoteList = async (notes) => {
   }
 };
 
+function renderPixelGrid(mask) {
+  pixelGrid.textContent = '';
+
+  for (let col = 0; col < 8; col++) {
+    const pixelCol = document.createElement('div');
+    pixelCol.classList.add('pixel-col');
+    for (let row = 0; row < 8; row++) {
+      const pixel = document.createElement('div');
+      pixel.classList.add('pixel');
+      if (mask) {
+        if (maskToGrid(mask)[col].charAt(row) == 1) pixel.classList.add('on');
+      }
+      pixelCol.appendChild(pixel);
+    }
+    pixelGrid.appendChild(pixelCol);
+  }
+}
+
+function maskToGrid(mask) {
+  return mask.split(',').map(num => Number(num).toString(2).padStart(8, '0'));
+}
+
+function handlePixelGrid(event) {
+  event.stopPropagation();
+
+  if (!event.target.matches('.pixel') || (!mouseDown && event.type !== 'click')) return;
+  const pixel = event.target;
+  if (drawMode === 'draw') pixel.classList.add('on');
+  else pixel.classList.remove('on');
+}
+
+function getPixelMask() {
+  let mask = "";
+  var pixelCol = document.querySelectorAll('.pixel-col');
+
+  [...pixelCol].forEach(pc => {
+    let col = "";
+    [...pc.children].forEach(pixel => {
+      col += pixel.classList.contains('on') ? "1" : "0";
+    });
+    col = parseInt(col, 2);  // convert to decimal
+    mask += col + ',';
+  });
+
+  mask = mask.slice(0, -1);  // remove last comma
+  console.log(mask);
+  return mask;
+}
+
 // Gets notes from the db and renders them to the sidebar
 const getAndRenderNotes = () => getNotes().then(renderNoteList);
 
@@ -178,6 +234,17 @@ if (window.location.pathname === '/notes') {
   newNoteBtn.addEventListener('click', handleNewNoteView);
   noteTitle.addEventListener('keyup', handleRenderSaveBtn);
   noteText.addEventListener('keyup', handleRenderSaveBtn);
+  window.addEventListener('mousedown', (e) => {
+    mouseDown = true;
+    if (e.target.matches('.pixel')) {
+      if (e.target.classList.contains('on')) drawMode = 'erase';
+      else drawMode = 'draw';
+    }
+  });
+  window.addEventListener('mouseup', () => {mouseDown = false});
+  pixelGrid.addEventListener('mousemove', handlePixelGrid);
+  pixelGrid.addEventListener('click', handlePixelGrid);
 }
 
+renderPixelGrid();
 getAndRenderNotes();

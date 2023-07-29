@@ -15,15 +15,16 @@ notes.get('/', (req, res) => {
 });
 
 notes.post('/', (req, res) => {
-    const { title, text } = req.body;
-    if (!title || !text) {
-        console.error(`\u001b[31m Request body must have title and text!\nRequest Body:\n${req.body}`);
+    const { title, text, mask } = req.body;
+    if (!title || !text || !mask) {
+        console.error(`\u001b[31m Request body must have title, text, and mask!\nRequest Body:\n${req.body}`);
         return;
     }
 
     const note = {
         title: title,
         text: text,
+        mask: mask,
         id: uuidv4()
     }
 

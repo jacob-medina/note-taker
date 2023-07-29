@@ -1,1 +1,20 @@
-[]
+[
+    {
+        "title": "Cityscape",
+        "text": "It's a city...",
+        "mask": "255,135,7,15,1,1,1,1",
+        "id": "e6a07b57-8d32-4d55-b02b-52e1c96aff1d"
+    },
+    {
+        "title": "Smile",
+        "text": "It's a happy face!",
+        "mask": "4,2,33,1,1,33,2,4",
+        "id": "00bb9fdf-3333-4536-bb8a-d42df7de654a"
+    },
+    {
+        "title": "Title",
+        "text": "Descrip",
+        "mask": "63,63,127,231,231,255,255,255",
+        "id": "14073738-3e8b-497c-a46d-0d896855936f"
+    }
+]
