@@ -28,6 +28,7 @@ notes.post('/', (req, res) => {
     }
 
     appendJSON('./db/db.json', note);
+    res.json('Save successful!');
 });
 
 module.exports = notes;

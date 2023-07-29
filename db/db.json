@@ -12,5 +12,15 @@
         "title": "Dishes",
         "text": "Chores are fun!",
         "id": "214c0f1d-45b2-4723-ad74-a54cfcd5fd46"
+    },
+    {
+        "title": "My Note",
+        "text": "Here's some text!",
+        "id": "1451e6ea-4af8-49d7-ba1c-547c113d28be"
+    },
+    {
+        "title": "Save this!",
+        "text": "Please :(",
+        "id": "465b4f9b-97fb-4b88-b68a-64a3fb4d3516"
     }
 ]
