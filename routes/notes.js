@@ -1,6 +1,6 @@
 const notes = require('express').Router();
 const fs = require('fs');
-const { appendJSON } = require('../helpers/fsExtra');
+const { appendJSON, removeJSON } = require('../helpers/fsExtra');
 const { v4: uuidv4 } = require('uuid');
 
 notes.get('/', (req, res) => {
@@ -29,6 +29,15 @@ notes.post('/', (req, res) => {
 
     appendJSON('./db/db.json', note);
     res.json('Save successful!');
+});
+
+notes.delete('/:id', (req, res) => {
+    const id = req.params.id;
+    const searchFunc = (element) => element.id === id;
+
+    removeJSON('./db/db.json', searchFunc);
+
+    res.json('Delete successful!');
 });
 
 module.exports = notes;
