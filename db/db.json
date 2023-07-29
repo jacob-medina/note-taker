@@ -12,9 +12,9 @@
         "id": "00bb9fdf-3333-4536-bb8a-d42df7de654a"
     },
     {
-        "title": "Title",
-        "text": "Descrip",
-        "mask": "63,63,127,231,231,255,255,255",
-        "id": "14073738-3e8b-497c-a46d-0d896855936f"
+        "title": "Double Doors",
+        "text": "They open and close.",
+        "mask": "255,143,255,143,143,255,143,255",
+        "id": "a740f7fd-213e-4e8b-937a-1800bdf93738"
     }
 ]

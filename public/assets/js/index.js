@@ -181,6 +181,8 @@ const renderNoteList = async (notes) => {
 
 function renderPixelGrid(mask) {
   pixelGrid.textContent = '';
+  let grid;
+  if (mask) grid = maskToGrid(mask);
 
   for (let col = 0; col < 8; col++) {
     const pixelCol = document.createElement('div');
@@ -189,7 +191,7 @@ function renderPixelGrid(mask) {
       const pixel = document.createElement('div');
       pixel.classList.add('pixel');
       if (mask) {
-        if (maskToGrid(mask)[col].charAt(row) == 1) pixel.classList.add('on');
+        if (grid[col].charAt(row) == 1) pixel.classList.add('on');
       }
       pixelCol.appendChild(pixel);
     }
@@ -229,6 +231,57 @@ function getPixelMask() {
   return mask;
 }
 
+function getRandomMask() {
+  let mask = [];
+  for (let i = 0; i < 8; i++) {
+    mask.push(Math.floor(Math.random() * 255));
+  }
+  return mask.join(",");
+}
+
+function generateHexGrid(columns, rows) {
+  const drawFromMask = (mask) => {
+    const step = 60 / 8;
+    const grid = maskToGrid(mask);
+    let svg = '';
+
+    for (let col = 0; col < 8; col++) {
+      for (let row = 0; row < 8; row++) {
+        if (grid[col].charAt(row) == 1) {
+          svg += `<rect class="svg-pixel" x="${col*step}" y="${row*step}" width="${step}" height="${step}" clip-path="url(#clip-hex)" />\n`;
+        }
+      }
+    }
+
+    return svg;
+  }
+
+  const hexGrid = document.querySelector('.hex-grid');
+  for (let col = 0; col < columns; col++) {
+    const hexCol = document.createElement('div');
+    hexCol.classList.add('hex-col');
+    for (let i = 0; i < rows; i++) {
+      const hex = document.createElement('div');
+      hex.classList.add('hex');
+      hex.innerHTML =
+`<svg width="60" height="60">
+  <defs>
+    <clipPath id="clip-hex">
+      <polygon points="60,30 45,56 15,56 0,30 15,4 45,4"></polygon>
+    </clipPath>
+  </defs>
+
+  <polygon class="svg-hex" points="60,30 45,56 15,56 0,30 15,4 45,4"></polygon>
+
+  ${drawFromMask(getRandomMask())}
+</svg>`;
+      // <rect width="60" height="60" fill="#FFD966" clip-path="url(#clip-hex)" />
+      hexCol.appendChild(hex);
+    }
+    hexGrid.appendChild(hexCol);
+  }
+}
+
 // Gets notes from the db and renders them to the sidebar
 const getAndRenderNotes = () => getNotes().then(renderNoteList);
 
@@ -247,7 +300,12 @@ if (window.location.pathname === '/notes') {
   window.addEventListener('mouseup', () => {mouseDown = false});
   pixelGrid.addEventListener('mousemove', handlePixelGrid);
   pixelGrid.addEventListener('click', handlePixelGrid);
+
+  renderPixelGrid();
 }
 
-renderPixelGrid();
+else {
+  generateHexGrid(20,8);
+}
+
 getAndRenderNotes();

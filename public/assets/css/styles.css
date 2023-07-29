@@ -11,6 +11,7 @@ body {
   margin: 0;
   padding: 0;
   background-color: var(--light);
+  isolation: isolate;
   color: var(--dark);
 }
 
@@ -104,15 +105,54 @@ nav {
 .pixel {
   width: var(--pixel-size);
   height: var(--pixel-size);
+}
 
+.pixel-grid:not(.readonly) .pixel {
   border: 1px solid var(--dark);
 }
 
-.pixel:hover,
+.pixel-grid:not(.readonly) .pixel:hover,
 .pixel.on {
   background-color: var(--dark);
 }
 
-.pixel:hover {
+.pixel-grid:not(.readonly) .pixel:hover {
   border: 4px solid var(--primary);
+}
+
+.hex-grid {
+  display: flex;
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: scale(2);
+  z-index: -1;
+}
+
+.hex-col {
+  display: flex;
+  flex-direction: column;
+  width: min-content;
+  margin-left: -5px; /* -15px*/
+}
+
+.hex-col:nth-child(even) {
+  position: relative;
+  top: 25px;
+}
+
+.hex {
+  display: inline-block;
+  width: min-content;
+  margin-top: 2px; /* -6px*/
+}
+
+.svg-hex {
+  fill: var(--primary);
+  stroke: var(--dark);
+  stroke-width: 4px;
+}
+
+.svg-pixel {
+  fill: var(--dark);
 }
