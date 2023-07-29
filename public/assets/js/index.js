@@ -60,12 +60,14 @@ const renderActiveNote = () => {
   if (activeNote.id) {
     noteTitle.setAttribute('readonly', true);
     noteText.setAttribute('readonly', true);
+    pixelGrid.classList.add('readonly');
     noteTitle.value = activeNote.title;
     noteText.value = activeNote.text;
     renderPixelGrid(activeNote.mask);
   } else {
     noteTitle.removeAttribute('readonly');
     noteText.removeAttribute('readonly');
+    pixelGrid.classList.remove('readonly');
     noteTitle.value = '';
     noteText.value = '';
     renderPixelGrid();
@@ -116,7 +118,7 @@ const handleNewNoteView = (e) => {
 };
 
 const handleRenderSaveBtn = () => {
-  if (!noteTitle.value.trim() || !noteText.value.trim()) {
+  if (!noteTitle.value.trim() || !noteText.value.trim() || noteTitle.getAttribute('readonly') || noteText.getAttribute('readonly')) {
     hide(saveNoteBtn);
   } else {
     show(saveNoteBtn);
@@ -202,6 +204,7 @@ function maskToGrid(mask) {
 function handlePixelGrid(event) {
   event.stopPropagation();
 
+  if (pixelGrid.matches('.readonly')) return;
   if (!event.target.matches('.pixel') || (!mouseDown && event.type !== 'click')) return;
   const pixel = event.target;
   if (drawMode === 'draw') pixel.classList.add('on');
