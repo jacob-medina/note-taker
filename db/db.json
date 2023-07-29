@@ -1,6 +1,16 @@
 [
     {
-        "title":"Test Title",
-        "text":"Test text"
+        "title": "Test Title",
+        "text": "Test text"
+    },
+    {
+        "title": "new",
+        "text": "note",
+        "id": "6ad7ff99-c89f-459b-8acf-a660df13ac09"
+    },
+    {
+        "title": "Dishes",
+        "text": "Chores are fun!",
+        "id": "214c0f1d-45b2-4723-ad74-a54cfcd5fd46"
     }
 ]
