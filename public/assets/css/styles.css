@@ -5,6 +5,20 @@
   --dark: #a3724c;
 }
 
+@font-face {
+  font-family: "Silkscreen";
+  src: url('../fonts/slkscr.ttf');
+
+  font-weight: normal;
+}
+
+@font-face {
+  font-family: "Silkscreen";
+  src: url('../fonts/slkscrb.ttf');
+
+  font-weight: bold;
+}
+
 html,
 body {
   height: 100%;
@@ -13,14 +27,41 @@ body {
   background-color: var(--light);
   isolation: isolate;
   color: var(--dark);
+  font-family: "Silkscreen", serif;
+}
+
+body {
+  overflow: hidden;
+}
+
+h1, h2, h3 {
+  font-weight: bold !important;
 }
 
 nav {
   background-color: var(--primary) !important;
+  font-weight: bold;
 }
 
 .navbar-brand {
   color: var(--dark);
+}
+
+.center-card {
+  background-color: var(--light);
+}
+
+a[role=button] {
+  background-color: var(--primary);
+  border: 4px solid var(--dark);
+  color: var(--dark);
+  border-radius: 0;
+}
+
+a[role=button]:hover {
+  background-color: var(--primary);
+  border-color: var(--dark);
+  color: black;
 }
 
 .save-note {
@@ -57,7 +98,7 @@ nav {
 
 .note-title:read-only,
 .note-textarea:read-only {
-  color: #757575;
+  color: var(--dark);
 }
 
 .list-container .card {
@@ -120,12 +161,27 @@ nav {
   border: 4px solid var(--primary);
 }
 
+.hex-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
 .hex-grid {
   display: flex;
+  transform: scale(2);
+  transform-origin: top left;
+  position: absolute;
+  top: 10px;
+  left: 20px;
+}
+
+.hex-grid-absolute {
   position: absolute;
   left: 0;
-  top: 0;
-  transform: scale(2);
+  top: 30px;
   z-index: -1;
 }
 
@@ -133,7 +189,7 @@ nav {
   display: flex;
   flex-direction: column;
   width: min-content;
-  margin-left: -5px; /* -15px*/
+  margin-left: -5px;
 }
 
 .hex-col:nth-child(even) {
@@ -145,6 +201,29 @@ nav {
   display: inline-block;
   width: min-content;
   margin-top: 2px; /* -6px*/
+  transition: transform 0.2s;
+  position: relative;
+}
+
+.hex[data-title]:hover {
+  cursor: pointer;
+  transform: scale(1.05);
+  transition: transform 0.2s;
+}
+
+.hex[data-title]:hover::before {
+  content: attr(data-title);
+  position: absolute;
+  text-align: center;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: x-small;
+  background-color: var(--light);
+}
+
+.hex svg {
+  overflow: visible;
 }
 
 .svg-hex {

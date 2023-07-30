@@ -35,7 +35,8 @@ const getNotes = () =>
     headers: {
       'Content-Type': 'application/json',
     },
-  });
+  })
+  .then(data => data.json());
 
 const saveNote = (note) =>
   fetch('/api/notes', {
@@ -107,7 +108,10 @@ const handleNoteDelete = (e) => {
 // Sets the activeNote and displays it
 const handleNoteView = (e) => {
   e.preventDefault();
-  activeNote = JSON.parse(e.target.parentElement.getAttribute('data-note'));
+  // e.stopPropagation();
+  // const li = (e.target.matches('.list-group-item')) ? e.target : e.target.parentElement;
+  const cell = e.currentTarget;
+  activeNote = JSON.parse(cell.getAttribute('data-note'));
   renderActiveNote();
 };
 
@@ -118,7 +122,7 @@ const handleNewNoteView = (e) => {
 };
 
 const handleRenderSaveBtn = () => {
-  if (!noteTitle.value.trim() || !noteText.value.trim() || noteTitle.getAttribute('readonly') || noteText.getAttribute('readonly')) {
+  if (!noteTitle.value.trim() || !noteText.value.trim() || noteTitle.getAttribute('readonly') || noteText.getAttribute('readonly') || (document.querySelector('.pixel.on') === null)) {
     hide(saveNoteBtn);
   } else {
     show(saveNoteBtn);
@@ -127,7 +131,7 @@ const handleRenderSaveBtn = () => {
 
 // Render the list of note titles
 const renderNoteList = async (notes) => {
-  let jsonNotes = await notes.json();
+  let jsonNotes = notes; //await notes.json();
   if (window.location.pathname === '/notes') {
     noteList.forEach((el) => (el.innerHTML = ''));
   }
@@ -142,7 +146,7 @@ const renderNoteList = async (notes) => {
     const spanEl = document.createElement('span');
     spanEl.classList.add('list-item-title');
     spanEl.innerText = text;
-    spanEl.addEventListener('click', handleNoteView);
+    liEl.addEventListener('click', handleNoteView);
 
     liEl.append(spanEl);
 
@@ -207,6 +211,7 @@ function handlePixelGrid(event) {
   event.stopPropagation();
 
   if (pixelGrid.matches('.readonly')) return;
+  handleRenderSaveBtn();
   if (!event.target.matches('.pixel') || (!mouseDown && event.type !== 'click')) return;
   const pixel = event.target;
   if (drawMode === 'draw') pixel.classList.add('on');
@@ -232,14 +237,14 @@ function getPixelMask() {
 }
 
 function getRandomMask() {
-  let mask = [];
+  const mask = [];
   for (let i = 0; i < 8; i++) {
     mask.push(Math.floor(Math.random() * 255));
   }
   return mask.join(",");
 }
 
-function generateHexGrid(columns, rows) {
+function generateHexGrid(columns, rows, cellsArray=[], fillRandom=false) {
   const drawFromMask = (mask) => {
     const step = 60 / 8;
     const grid = maskToGrid(mask);
@@ -256,13 +261,27 @@ function generateHexGrid(columns, rows) {
     return svg;
   }
 
+  const emptyOrRandomMask = (random=true) => random ? getRandomMask() : "0,0,0,0,0,0,0,0";
+
+  let cellsArrayIndex = 0;
+
   const hexGrid = document.querySelector('.hex-grid');
   for (let col = 0; col < columns; col++) {
     const hexCol = document.createElement('div');
     hexCol.classList.add('hex-col');
+    
     for (let i = 0; i < rows; i++) {
       const hex = document.createElement('div');
       hex.classList.add('hex');
+      if (cellsArray[cellsArrayIndex]) {
+        hex.setAttribute('data-note', JSON.stringify(cellsArray[cellsArrayIndex]));
+        hex.setAttribute('data-title', cellsArray[cellsArrayIndex].title);
+      }
+      
+      hex.addEventListener('click', handleNoteView);
+      let mask;
+      if (cellsArray[cellsArrayIndex]) mask = cellsArray[cellsArrayIndex].mask ?? emptyOrRandomMask(fillRandom);
+      else mask = emptyOrRandomMask(fillRandom);
       hex.innerHTML =
 `<svg width="60" height="60">
   <defs>
@@ -273,17 +292,25 @@ function generateHexGrid(columns, rows) {
 
   <polygon class="svg-hex" points="60,30 45,56 15,56 0,30 15,4 45,4"></polygon>
 
-  ${drawFromMask(getRandomMask())}
+  ${drawFromMask(mask)}
 </svg>`;
       // <rect width="60" height="60" fill="#FFD966" clip-path="url(#clip-hex)" />
       hexCol.appendChild(hex);
+      cellsArrayIndex++;
     }
     hexGrid.appendChild(hexCol);
   }
 }
 
+const renderHive = (notes) => {
+  const masksArray = notes.map(cell => cell.mask);
+  console.log(notes);
+  generateHexGrid(3, 8, notes);
+}
+
 // Gets notes from the db and renders them to the sidebar
 const getAndRenderNotes = () => getNotes().then(renderNoteList);
+const getAndRenderHive = () => getNotes().then(renderHive);
 
 if (window.location.pathname === '/notes') {
   saveNoteBtn.addEventListener('click', handleNoteSave);
@@ -302,10 +329,11 @@ if (window.location.pathname === '/notes') {
   pixelGrid.addEventListener('click', handlePixelGrid);
 
   renderPixelGrid();
+  getAndRenderHive();
+  getAndRenderNotes();
 }
 
 else {
-  generateHexGrid(20,8);
+  generateHexGrid(14,6, [], true);
 }
 
-getAndRenderNotes();

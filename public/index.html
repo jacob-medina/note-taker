@@ -11,15 +11,18 @@
 </head>
 
 <body>
-  <div class="hex-grid"></div>
+  <div class="hex-grid hex-grid-absolute"></div>
   <nav class="navbar">
-    <a class="navbar-brand p-3" href="/">Pixel Bee</a>
+    <a class="navbar-brand p-3 d-flex align-items-center" href="/">
+      <img src="./assets/images/pixelbee-logo.png" alt="Pixel Bee Logo" height="20px"/>
+      <span class="ms-3">Pixel Bee</span>
+    </a>
   </nav>
   <div class="container">
-    <div style="margin-top: 80px;" class="text-center p-5 mb-4 bg-light">
-      <h1 class="display-4">Pixel Bee <span role="img" aria-label="Bee">🐝</span></h1>
+    <div style="margin-top: 80px;" class="center-card text-center p-5 mb-4">
+      <h1 class="display-4">Pixel Bee <img src="./assets/images/pixelbee-logo.png" alt="Pixel Bee Logo" height="40px"/></h1>
       <h4 class="mt-4">Fill the hive!</h4>
-      <a class="btn btn-primary btn-lg mt-4" href="/notes" role="button">Get Started</a>
+      <a class="btn btn-lg mt-4" href="/notes" role="button">Draw a cell</a>
     </div>
   </div>
   <script src="/assets/js/index.js"></script>

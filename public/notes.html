@@ -17,20 +17,28 @@
 
   <body>
     <nav class="navbar">
-      <a class="navbar-brand p-3" href="/">Pixel Bee</a>
+      <a class="navbar-brand p-3 d-flex align-items-center" href="/">
+        <img src="./assets/images/pixelbee-logo.png" alt="Pixel Bee Logo" height="20px"/>
+        <span class="ms-3">Pixel Bee</span>
+      </a>
       <div class="icons">
         <i class="fas fa-save save-note"></i>
         <i class="fas fa-plus new-note"></i>
       </div>
     </nav>
+
+    
     <div class="container-fluid">
       <div class="row">
-        <div class="col-4 list-container">
+        <div class="col-6 list-container">
+          <div class="hex-container">
+            <div class="hex-grid"></div>
+          </div>
           <div class="card">
             <ul class="list-group"></ul>
           </div>
         </div>
-        <div class="col-8">
+        <div class="col-6">
           <input
             class="note-title"
             placeholder="Cell Title"

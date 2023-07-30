@@ -12,9 +12,21 @@
         "id": "00bb9fdf-3333-4536-bb8a-d42df7de654a"
     },
     {
-        "title": "Double Doors",
-        "text": "They open and close.",
-        "mask": "255,143,255,143,143,255,143,255",
-        "id": "a740f7fd-213e-4e8b-937a-1800bdf93738"
+        "title": "Window",
+        "text": "A nice place to look through",
+        "mask": "255,137,137,255,255,137,137,255",
+        "id": "898b8a86-147e-4b9f-a72b-6a4dca9156e7"
+    },
+    {
+        "title": "Box",
+        "text": "Also called a square!",
+        "mask": "255,129,129,129,129,129,129,255",
+        "id": "1e6f45f5-506f-4366-b114-681801c8565d"
+    },
+    {
+        "title": "Bubby",
+        "text": "Dog",
+        "mask": "224,144,82,62,62,82,144,224",
+        "id": "b6fc20ca-6784-441c-b7c8-9f349d9b587d"
     }
 ]
