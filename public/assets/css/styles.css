@@ -137,6 +137,10 @@ a[role=button]:hover {
   cursor: pointer;
 }
 
+.edit-container {
+  min-width: 285px;
+}
+
 .draw-instructions:has(~.pixel-grid.readonly) {
   display: none;
 }
@@ -253,4 +257,15 @@ a[role=button]:hover {
 
 .svg-pixel {
   fill: var(--dark);
+}
+
+.clear-btn,
+.delete-btn {
+  background-color: transparent;
+  border: none;
+  color: var(--dark);
+}
+
+:is(.clear-btn, .delete-btn, i):hover {
+  color: black;
 }
