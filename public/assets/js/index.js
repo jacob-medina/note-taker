@@ -67,9 +67,6 @@ const clearPixelGrid = () => renderPixelGrid('0,0,0,0,0,0,0,0');
 
 const renderActiveNote = () => {
   hide(saveNoteBtn);
-
-  clearBtn.removeEventListener('click', handleNoteDelete);
-  clearBtn.removeEventListener('click', clearPixelGrid);
   
   // if note exists
   if (activeNote.id) {
@@ -250,7 +247,7 @@ function getPixelMask() {
   });
 
   mask = mask.slice(0, -1);  // remove last comma
-  console.log(mask);
+
   return mask;
 }
 
