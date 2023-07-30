@@ -82,6 +82,7 @@ const handleNoteSave = () => {
     mask: getPixelMask()
   };
   saveNote(newNote).then(() => {
+    getAndRenderHive();
     getAndRenderNotes();
     renderActiveNote();
   });
@@ -266,23 +267,36 @@ function generateHexGrid(columns, rows, cellsArray=[], fillRandom=false) {
   let cellsArrayIndex = 0;
 
   const hexGrid = document.querySelector('.hex-grid');
+  hexGrid.textContent = '';  // clear the pervious grid
+  const hexColumns = [];
+
+  // create an array of hex columns
   for (let col = 0; col < columns; col++) {
     const hexCol = document.createElement('div');
     hexCol.classList.add('hex-col');
+    hexColumns.push(hexCol);
+  }
+  
+  // create each hex, filling cells left-to-right, top-to-bottom
+  for (let i = 0; i < rows * columns; i++) {
+    const hex = document.createElement('div');
+    hex.classList.add('hex');
     
-    for (let i = 0; i < rows; i++) {
-      const hex = document.createElement('div');
-      hex.classList.add('hex');
-      if (cellsArray[cellsArrayIndex]) {
-        hex.setAttribute('data-note', JSON.stringify(cellsArray[cellsArrayIndex]));
-        hex.setAttribute('data-title', cellsArray[cellsArrayIndex].title);
-      }
-      
+    let mask;
+    if (cellsArray[i]) {
+      hex.setAttribute('data-note', JSON.stringify(cellsArray[i]));
+      hex.setAttribute('data-title', cellsArray[i].title);
+      mask = cellsArray[i].mask ?? emptyOrRandomMask(fillRandom);
       hex.addEventListener('click', handleNoteView);
-      let mask;
-      if (cellsArray[cellsArrayIndex]) mask = cellsArray[cellsArrayIndex].mask ?? emptyOrRandomMask(fillRandom);
-      else mask = emptyOrRandomMask(fillRandom);
-      hex.innerHTML =
+    }
+
+    else {
+      mask = emptyOrRandomMask(fillRandom);
+      hex.setAttribute('data-title', "New Cell");
+      hex.addEventListener('click', handleNewNoteView)
+    }
+
+    hex.innerHTML =
 `<svg width="60" height="60">
   <defs>
     <clipPath id="clip-hex">
@@ -294,23 +308,16 @@ function generateHexGrid(columns, rows, cellsArray=[], fillRandom=false) {
 
   ${drawFromMask(mask)}
 </svg>`;
-      // <rect width="60" height="60" fill="#FFD966" clip-path="url(#clip-hex)" />
-      hexCol.appendChild(hex);
-      cellsArrayIndex++;
-    }
-    hexGrid.appendChild(hexCol);
+    // <rect width="60" height="60" fill="#FFD966" clip-path="url(#clip-hex)" />
+    hexColumns[i % columns].appendChild(hex);
   }
-}
 
-const renderHive = (notes) => {
-  const masksArray = notes.map(cell => cell.mask);
-  console.log(notes);
-  generateHexGrid(3, 8, notes);
+  hexColumns.forEach(hc => hexGrid.appendChild(hc));
 }
 
 // Gets notes from the db and renders them to the sidebar
 const getAndRenderNotes = () => getNotes().then(renderNoteList);
-const getAndRenderHive = () => getNotes().then(renderHive);
+const getAndRenderHive = () => getNotes().then((notes) => generateHexGrid(5, Math.max(Math.ceil((notes.length + 1) / 5), 8), notes));
 
 if (window.location.pathname === '/notes') {
   saveNoteBtn.addEventListener('click', handleNoteSave);

@@ -28,5 +28,41 @@
         "text": "Dog",
         "mask": "224,144,82,62,62,82,144,224",
         "id": "b6fc20ca-6784-441c-b7c8-9f349d9b587d"
+    },
+    {
+        "title": "Football",
+        "text": "The American kind",
+        "mask": "24,36,66,82,82,82,36,24",
+        "id": "648c25f4-d8c9-4ee2-bef6-2b2686d868c5"
+    },
+    {
+        "title": "X",
+        "text": "Marks the spot!",
+        "mask": "195,102,60,24,24,60,102,195",
+        "id": "682812a2-3ba6-441a-8a0f-154e2067c1dd"
+    },
+    {
+        "title": "Person",
+        "text": "Tried my best with 8x8 pixels, lol",
+        "mask": "0,8,11,124,107,8,0,0",
+        "id": "c5eeb772-6ba1-4ba5-b671-0126064268ac"
+    },
+    {
+        "title": "Dog",
+        "text": "Man's best friend",
+        "mask": "48,32,30,24,24,88,62,48",
+        "id": "7f1d2976-80b6-4c8b-ad5e-8acc9b70eea2"
+    },
+    {
+        "title": "Stem",
+        "text": "Barbed plant stem",
+        "mask": "0,22,147,255,255,35,102,0",
+        "id": "771599d9-c285-4c48-85e4-b5eb2fc8e01a"
+    },
+    {
+        "title": "L",
+        "text": "Usually for \"lose\" or Luigi",
+        "mask": "0,0,252,252,12,12,12,0",
+        "id": "08b6c037-1cfd-4f0e-a996-079b15b6f885"
     }
 ]

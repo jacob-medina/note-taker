@@ -137,6 +137,10 @@ a[role=button]:hover {
   cursor: pointer;
 }
 
+.draw-instructions:has(~.pixel-grid.readonly) {
+  display: none;
+}
+
 .pixel-grid {
   --pixel-size: 30px;
   display: grid;
@@ -166,7 +170,7 @@ a[role=button]:hover {
   height: 100%;
   position: relative;
   overflow-y: auto;
-  overflow-x: hidden;
+  overflow-x: auto;
 }
 
 .hex-grid {
@@ -205,6 +209,12 @@ a[role=button]:hover {
   position: relative;
 }
 
+/* .hex:not([data-title]):has(svg rect):hover {
+  cursor: text;
+  transform: scale(1.05);
+  transition: transform 0.2s;
+} */
+
 .hex[data-title]:hover {
   cursor: pointer;
   transform: scale(1.05);
@@ -220,6 +230,15 @@ a[role=button]:hover {
   transform: translate(-50%, -50%);
   font-size: x-small;
   background-color: var(--light);
+}
+
+#hive-bg .hex:hover {
+  cursor: inherit;
+  transform: none;
+}
+
+#hive-bg .hex[data-title]:hover::before {
+  content: "";
 }
 
 .hex svg {
