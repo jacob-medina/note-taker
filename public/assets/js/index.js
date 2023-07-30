@@ -3,6 +3,9 @@ let noteText;
 let saveNoteBtn;
 let newNoteBtn;
 let noteList;
+let pixelGrid;
+let mouseDown = false;
+let drawMode = 'draw';
 
 if (window.location.pathname === '/notes') {
   noteTitle = document.querySelector('.note-title');
@@ -10,6 +13,7 @@ if (window.location.pathname === '/notes') {
   saveNoteBtn = document.querySelector('.save-note');
   newNoteBtn = document.querySelector('.new-note');
   noteList = document.querySelectorAll('.list-container .list-group');
+  pixelGrid = document.querySelector('.pixel-grid');
 }
 
 // Show an element
@@ -31,7 +35,8 @@ const getNotes = () =>
     headers: {
       'Content-Type': 'application/json',
     },
-  });
+  })
+  .then(data => data.json());
 
 const saveNote = (note) =>
   fetch('/api/notes', {
@@ -56,13 +61,17 @@ const renderActiveNote = () => {
   if (activeNote.id) {
     noteTitle.setAttribute('readonly', true);
     noteText.setAttribute('readonly', true);
+    pixelGrid.classList.add('readonly');
     noteTitle.value = activeNote.title;
     noteText.value = activeNote.text;
+    renderPixelGrid(activeNote.mask);
   } else {
     noteTitle.removeAttribute('readonly');
     noteText.removeAttribute('readonly');
+    pixelGrid.classList.remove('readonly');
     noteTitle.value = '';
     noteText.value = '';
+    renderPixelGrid();
   }
 };
 
@@ -70,8 +79,10 @@ const handleNoteSave = () => {
   const newNote = {
     title: noteTitle.value,
     text: noteText.value,
+    mask: getPixelMask()
   };
   saveNote(newNote).then(() => {
+    getAndRenderHive();
     getAndRenderNotes();
     renderActiveNote();
   });
@@ -98,7 +109,10 @@ const handleNoteDelete = (e) => {
 // Sets the activeNote and displays it
 const handleNoteView = (e) => {
   e.preventDefault();
-  activeNote = JSON.parse(e.target.parentElement.getAttribute('data-note'));
+  // e.stopPropagation();
+  // const li = (e.target.matches('.list-group-item')) ? e.target : e.target.parentElement;
+  const cell = e.currentTarget;
+  activeNote = JSON.parse(cell.getAttribute('data-note'));
   renderActiveNote();
 };
 
@@ -109,7 +123,7 @@ const handleNewNoteView = (e) => {
 };
 
 const handleRenderSaveBtn = () => {
-  if (!noteTitle.value.trim() || !noteText.value.trim()) {
+  if (!noteTitle.value.trim() || !noteText.value.trim() || noteTitle.getAttribute('readonly') || noteText.getAttribute('readonly') || (document.querySelector('.pixel.on') === null)) {
     hide(saveNoteBtn);
   } else {
     show(saveNoteBtn);
@@ -118,7 +132,7 @@ const handleRenderSaveBtn = () => {
 
 // Render the list of note titles
 const renderNoteList = async (notes) => {
-  let jsonNotes = await notes.json();
+  let jsonNotes = notes; //await notes.json();
   if (window.location.pathname === '/notes') {
     noteList.forEach((el) => (el.innerHTML = ''));
   }
@@ -133,7 +147,7 @@ const renderNoteList = async (notes) => {
     const spanEl = document.createElement('span');
     spanEl.classList.add('list-item-title');
     spanEl.innerText = text;
-    spanEl.addEventListener('click', handleNoteView);
+    liEl.addEventListener('click', handleNoteView);
 
     liEl.append(spanEl);
 
@@ -170,14 +184,163 @@ const renderNoteList = async (notes) => {
   }
 };
 
+function renderPixelGrid(mask) {
+  pixelGrid.textContent = '';
+  let grid;
+  if (mask) grid = maskToGrid(mask);
+
+  for (let col = 0; col < 8; col++) {
+    const pixelCol = document.createElement('div');
+    pixelCol.classList.add('pixel-col');
+    for (let row = 0; row < 8; row++) {
+      const pixel = document.createElement('div');
+      pixel.classList.add('pixel');
+      if (mask) {
+        if (grid[col].charAt(row) == 1) pixel.classList.add('on');
+      }
+      pixelCol.appendChild(pixel);
+    }
+    pixelGrid.appendChild(pixelCol);
+  }
+}
+
+function maskToGrid(mask) {
+  return mask.split(',').map(num => Number(num).toString(2).padStart(8, '0'));
+}
+
+function handlePixelGrid(event) {
+  event.stopPropagation();
+
+  if (pixelGrid.matches('.readonly')) return;
+  handleRenderSaveBtn();
+  if (!event.target.matches('.pixel') || (!mouseDown && event.type !== 'click')) return;
+  const pixel = event.target;
+  if (drawMode === 'draw') pixel.classList.add('on');
+  else pixel.classList.remove('on');
+}
+
+function getPixelMask() {
+  let mask = "";
+  var pixelCol = document.querySelectorAll('.pixel-col');
+
+  [...pixelCol].forEach(pc => {
+    let col = "";
+    [...pc.children].forEach(pixel => {
+      col += pixel.classList.contains('on') ? "1" : "0";
+    });
+    col = parseInt(col, 2);  // convert to decimal
+    mask += col + ',';
+  });
+
+  mask = mask.slice(0, -1);  // remove last comma
+  console.log(mask);
+  return mask;
+}
+
+function getRandomMask() {
+  const mask = [];
+  for (let i = 0; i < 8; i++) {
+    mask.push(Math.floor(Math.random() * 255));
+  }
+  return mask.join(",");
+}
+
+function generateHexGrid(columns, rows, cellsArray=[], fillRandom=false) {
+  const drawFromMask = (mask) => {
+    const step = 60 / 8;
+    const grid = maskToGrid(mask);
+    let svg = '';
+
+    for (let col = 0; col < 8; col++) {
+      for (let row = 0; row < 8; row++) {
+        if (grid[col].charAt(row) == 1) {
+          svg += `<rect class="svg-pixel" x="${col*step}" y="${row*step}" width="${step}" height="${step}" clip-path="url(#clip-hex)" />\n`;
+        }
+      }
+    }
+
+    return svg;
+  }
+
+  const emptyOrRandomMask = (random=true) => random ? getRandomMask() : "0,0,0,0,0,0,0,0";
+
+  let cellsArrayIndex = 0;
+
+  const hexGrid = document.querySelector('.hex-grid');
+  hexGrid.textContent = '';  // clear the pervious grid
+  const hexColumns = [];
+
+  // create an array of hex columns
+  for (let col = 0; col < columns; col++) {
+    const hexCol = document.createElement('div');
+    hexCol.classList.add('hex-col');
+    hexColumns.push(hexCol);
+  }
+  
+  // create each hex, filling cells left-to-right, top-to-bottom
+  for (let i = 0; i < rows * columns; i++) {
+    const hex = document.createElement('div');
+    hex.classList.add('hex');
+    
+    let mask;
+    if (cellsArray[i]) {
+      hex.setAttribute('data-note', JSON.stringify(cellsArray[i]));
+      hex.setAttribute('data-title', cellsArray[i].title);
+      mask = cellsArray[i].mask ?? emptyOrRandomMask(fillRandom);
+      hex.addEventListener('click', handleNoteView);
+    }
+
+    else {
+      mask = emptyOrRandomMask(fillRandom);
+      hex.setAttribute('data-title', "New Cell");
+      hex.addEventListener('click', handleNewNoteView)
+    }
+
+    hex.innerHTML =
+`<svg width="60" height="60">
+  <defs>
+    <clipPath id="clip-hex">
+      <polygon points="60,30 45,56 15,56 0,30 15,4 45,4"></polygon>
+    </clipPath>
+  </defs>
+
+  <polygon class="svg-hex" points="60,30 45,56 15,56 0,30 15,4 45,4"></polygon>
+
+  ${drawFromMask(mask)}
+</svg>`;
+    // <rect width="60" height="60" fill="#FFD966" clip-path="url(#clip-hex)" />
+    hexColumns[i % columns].appendChild(hex);
+  }
+
+  hexColumns.forEach(hc => hexGrid.appendChild(hc));
+}
+
 // Gets notes from the db and renders them to the sidebar
 const getAndRenderNotes = () => getNotes().then(renderNoteList);
+const getAndRenderHive = () => getNotes().then((notes) => generateHexGrid(5, Math.max(Math.ceil((notes.length + 1) / 5), 8), notes));
 
 if (window.location.pathname === '/notes') {
   saveNoteBtn.addEventListener('click', handleNoteSave);
   newNoteBtn.addEventListener('click', handleNewNoteView);
   noteTitle.addEventListener('keyup', handleRenderSaveBtn);
   noteText.addEventListener('keyup', handleRenderSaveBtn);
+  window.addEventListener('mousedown', (e) => {
+    mouseDown = true;
+    if (e.target.matches('.pixel')) {
+      if (e.target.classList.contains('on')) drawMode = 'erase';
+      else drawMode = 'draw';
+    }
+  });
+  window.addEventListener('mouseup', () => {mouseDown = false});
+  pixelGrid.addEventListener('mousemove', handlePixelGrid);
+  pixelGrid.addEventListener('click', handlePixelGrid);
+
+  renderPixelGrid();
+  getAndRenderHive();
+  getAndRenderNotes();
 }
 
-getAndRenderNotes();
+else {
+  generateHexGrid(14,6, [], true);
+}
+

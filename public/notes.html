@@ -4,7 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>Note Taker</title>
+
+    <title>Pixel Bee</title>
+    <link rel="icon" type="image/x-icon" href="./assets/images/favicon.ico">
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous" />
     <link
       rel="stylesheet"
@@ -16,31 +19,41 @@
   </head>
 
   <body>
-    <nav class="navbar bg-info">
-      <a class="navbar-brand text-light p-3" href="/">Note Taker </a>
+    <nav class="navbar">
+      <a class="navbar-brand p-3 d-flex align-items-center" href="/">
+        <img src="./assets/images/pixelbee-logo.png" alt="Pixel Bee Logo" height="20px"/>
+        <span class="ms-3">Pixel Bee</span>
+      </a>
       <div class="icons">
-        <i class="fas fa-save text-light save-note"></i>
-        <i class="fas fa-plus text-light new-note"></i>
+        <i class="fas fa-save save-note"></i>
+        <i class="fas fa-plus new-note"></i>
       </div>
     </nav>
+
+    
     <div class="container-fluid">
       <div class="row">
-        <div class="col-4 list-container">
+        <div class="col-6 list-container">
+          <div class="hex-container">
+            <div class="hex-grid"></div>
+          </div>
           <div class="card">
             <ul class="list-group"></ul>
           </div>
         </div>
-        <div class="col-8">
+        <div class="col-6">
           <input
             class="note-title"
-            placeholder="Note Title"
-            maxlength="28"
+            placeholder="Cell Title"
+            maxlength="14"
             type="text"
           />
-          <textarea class="note-textarea" placeholder="Note Text"></textarea>
+          <textarea class="note-textarea" placeholder="Cell Description" maxlength="45"></textarea>
+          <p class="draw-instructions mb-1">Draw with your mouse:</p>
+          <div class="pixel-grid"></div>
         </div>
       </div>
     </div>
-    <script src="/assets/js/index.js"></script>
+    <script src="./assets/js/index.js"></script>
   </body>
 </html>
