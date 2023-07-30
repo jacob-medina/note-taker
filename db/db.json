@@ -64,5 +64,23 @@
         "text": "Usually for \"lose\" or Luigi",
         "mask": "0,0,252,252,12,12,12,0",
         "id": "08b6c037-1cfd-4f0e-a996-079b15b6f885"
+    },
+    {
+        "title": "Snake",
+        "text": "his name is sssssssylvester",
+        "mask": "206,138,138,138,138,139,139,248",
+        "id": "1fdb3b6d-8d14-4b5f-8ac4-3d279de2bc11"
+    },
+    {
+        "title": "Spiral",
+        "text": "Extra swirly!",
+        "mask": "62,67,89,85,145,145,155,142",
+        "id": "312e4cb3-3bbf-4b13-a88b-cb9218412f8d"
+    },
+    {
+        "title": "Bee",
+        "text": "A wee little baby bee",
+        "mask": "4,14,81,63,81,53,17,14",
+        "id": "7053bb70-daef-45b6-bcca-051c73430bcd"
     }
 ]
