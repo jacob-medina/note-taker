@@ -4,16 +4,23 @@ let saveNoteBtn;
 let newNoteBtn;
 let noteList;
 let pixelGrid;
+let clearBtn;
+let deleteBtn;
+let navbar = document.querySelector('.navbar-brand');
+
 let mouseDown = false;
 let drawMode = 'draw';
 
-if (window.location.pathname === '/notes') {
+
+if (window.location.pathname === '/cells') {
   noteTitle = document.querySelector('.note-title');
   noteText = document.querySelector('.note-textarea');
   saveNoteBtn = document.querySelector('.save-note');
   newNoteBtn = document.querySelector('.new-note');
   noteList = document.querySelectorAll('.list-container .list-group');
   pixelGrid = document.querySelector('.pixel-grid');
+  clearBtn = document.querySelector('.clear-btn');
+  deleteBtn = document.querySelector('.delete-btn');
 }
 
 // Show an element
@@ -30,7 +37,7 @@ const hide = (elem) => {
 let activeNote = {};
 
 const getNotes = () =>
-  fetch('/api/notes', {
+  fetch('/api/cells', {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -39,7 +46,7 @@ const getNotes = () =>
   .then(data => data.json());
 
 const saveNote = (note) =>
-  fetch('/api/notes', {
+  fetch('/api/cells', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -48,30 +55,46 @@ const saveNote = (note) =>
   });
 
 const deleteNote = (id) =>
-  fetch(`/api/notes/${id}`, {
+  fetch(`/api/cells/${id}`, {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',
     },
   });
 
+const deleteActiveNote = () => deleteNote(activeNote.id);
+const clearPixelGrid = () => renderPixelGrid('0,0,0,0,0,0,0,0');
+
 const renderActiveNote = () => {
   hide(saveNoteBtn);
 
+  clearBtn.removeEventListener('click', handleNoteDelete);
+  clearBtn.removeEventListener('click', clearPixelGrid);
+  
+  // if note exists
   if (activeNote.id) {
     noteTitle.setAttribute('readonly', true);
     noteText.setAttribute('readonly', true);
     pixelGrid.classList.add('readonly');
     noteTitle.value = activeNote.title;
     noteText.value = activeNote.text;
+    show(deleteBtn);
+    hide(clearBtn);
     renderPixelGrid(activeNote.mask);
-  } else {
+
+  }
+  
+  // if new note
+  else {
     noteTitle.removeAttribute('readonly');
     noteText.removeAttribute('readonly');
     pixelGrid.classList.remove('readonly');
     noteTitle.value = '';
     noteText.value = '';
+    show(clearBtn);
+    hide(deleteBtn);
     renderPixelGrid();
+
   }
 };
 
@@ -83,25 +106,19 @@ const handleNoteSave = () => {
   };
   saveNote(newNote).then(() => {
     getAndRenderHive();
-    getAndRenderNotes();
+    //getAndRenderNotes();
     renderActiveNote();
   });
 };
 
 // Delete the clicked note
-const handleNoteDelete = (e) => {
-  // Prevents the click listener for the list from being called when the button inside of it is clicked
-  e.stopPropagation();
-
-  const note = e.target;
-  const noteId = JSON.parse(note.parentElement.getAttribute('data-note')).id;
-
-  if (activeNote.id === noteId) {
-    activeNote = {};
-  }
+const handleNoteDelete = () => {
+  const noteId = activeNote.id
+  activeNote = {};
 
   deleteNote(noteId).then(() => {
-    getAndRenderNotes();
+    getAndRenderHive();
+    //getAndRenderNotes();
     renderActiveNote();
   });
 };
@@ -133,7 +150,7 @@ const handleRenderSaveBtn = () => {
 // Render the list of note titles
 const renderNoteList = async (notes) => {
   let jsonNotes = notes; //await notes.json();
-  if (window.location.pathname === '/notes') {
+  if (window.location.pathname === '/cells') {
     noteList.forEach((el) => (el.innerHTML = ''));
   }
 
@@ -179,7 +196,7 @@ const renderNoteList = async (notes) => {
     noteListItems.push(li);
   });
 
-  if (window.location.pathname === '/notes') {
+  if (window.location.pathname === '/cells') {
     noteListItems.forEach((note) => noteList[0].append(note));
   }
 };
@@ -308,39 +325,52 @@ function generateHexGrid(columns, rows, cellsArray=[], fillRandom=false) {
 
   ${drawFromMask(mask)}
 </svg>`;
-    // <rect width="60" height="60" fill="#FFD966" clip-path="url(#clip-hex)" />
+
     hexColumns[i % columns].appendChild(hex);
   }
 
   hexColumns.forEach(hc => hexGrid.appendChild(hc));
 }
 
-// Gets notes from the db and renders them to the sidebar
-const getAndRenderNotes = () => getNotes().then(renderNoteList);
+// const getAndRenderNotes = () => getNotes().then(renderNoteList);
+
+// Gets cells from the db and renders them to the sidebar
 const getAndRenderHive = () => getNotes().then((notes) => generateHexGrid(5, Math.max(Math.ceil((notes.length + 1) / 5), 8), notes));
 
-if (window.location.pathname === '/notes') {
+const drawOrErase = (e) => {
+  mouseDown = true;
+  if (e.target.matches('.pixel')) {
+    if (e.target.classList.contains('on')) drawMode = 'erase';
+    else drawMode = 'draw';
+  }
+}
+
+if (window.location.pathname === '/cells') {
   saveNoteBtn.addEventListener('click', handleNoteSave);
   newNoteBtn.addEventListener('click', handleNewNoteView);
   noteTitle.addEventListener('keyup', handleRenderSaveBtn);
   noteText.addEventListener('keyup', handleRenderSaveBtn);
-  window.addEventListener('mousedown', (e) => {
-    mouseDown = true;
-    if (e.target.matches('.pixel')) {
-      if (e.target.classList.contains('on')) drawMode = 'erase';
-      else drawMode = 'draw';
-    }
-  });
+  window.addEventListener('mousedown', drawOrErase);
   window.addEventListener('mouseup', () => {mouseDown = false});
   pixelGrid.addEventListener('mousemove', handlePixelGrid);
   pixelGrid.addEventListener('click', handlePixelGrid);
+  clearBtn.addEventListener('click', clearPixelGrid);
+  deleteBtn.addEventListener('click', handleNoteDelete);
 
   renderPixelGrid();
   getAndRenderHive();
-  getAndRenderNotes();
+  //getAndRenderNotes();
 }
 
 else {
-  generateHexGrid(14,6, [], true);
+  getNotes().then((notes) => generateHexGrid(14,6, notes, true));
 }
 
+// animate logo when user hovers over it
+navbar.addEventListener('mouseenter', () => {
+  document.querySelector('.navbar img').setAttribute('src', './assets/images/pixelbee-logo-anim.gif');
+});
+
+navbar.addEventListener('mouseleave', () => {
+  document.querySelector('.navbar img').setAttribute('src', './assets/images/pixelbee-logo.png');
+});

@@ -14,8 +14,8 @@ app.use(express.static('public'));
 app.use('/api', api);
 
 // static page routes
-app.get('/notes', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public/notes.html'));
+app.get('/cells', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public/cells.html'));
 });
 
 app.get('*', (req, res) => {
