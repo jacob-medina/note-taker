@@ -7,6 +7,7 @@ let pixelGrid;
 let clearBtn;
 let deleteBtn;
 let navbar = document.querySelector('.navbar-brand');
+let hexes;
 
 let mouseDown = false;
 let drawMode = 'draw';
@@ -43,7 +44,11 @@ const getNotes = () =>
       'Content-Type': 'application/json',
     },
   })
-  .then(data => data.json());
+  .then(data => data.json())
+  .then(data => {
+    hexes = data;
+    return data;
+  });
 
 const saveNote = (note) =>
   fetch('/api/cells', {
@@ -332,7 +337,7 @@ function generateHexGrid(columns, rows, cellsArray=[], fillRandom=false) {
 // const getAndRenderNotes = () => getNotes().then(renderNoteList);
 
 // Gets cells from the db and renders them to the sidebar
-const getAndRenderHive = () => getNotes().then((notes) => generateHexGrid(5, Math.max(Math.ceil((notes.length + 1) / 5), 8), notes));
+const getAndRenderHive = () => getNotes().then((notes) => handleHexResize('.hex-container', notes));
 
 const drawOrErase = (e) => {
   mouseDown = true;
@@ -340,6 +345,15 @@ const drawOrErase = (e) => {
     if (e.target.classList.contains('on')) drawMode = 'erase';
     else drawMode = 'draw';
   }
+}
+
+function handleHexResize(containerSelector, data, contain=true, fillRandom=false) {
+  const hexContainer = document.querySelector(containerSelector);
+  const containerWidth = hexContainer.getBoundingClientRect().width;  // width of hex grid container
+  const hexColWidth = 120;
+  const columns = contain ? Math.max(1, Math.floor(containerWidth / hexColWidth)) : (Math.ceil(containerWidth / hexColWidth) + 2);
+  const rows = Math.max(Math.ceil((data.length + 1) / columns), 8);
+  generateHexGrid(columns, rows, data, fillRandom);
 }
 
 if (window.location.pathname === '/cells') {
@@ -353,6 +367,7 @@ if (window.location.pathname === '/cells') {
   pixelGrid.addEventListener('click', handlePixelGrid);
   clearBtn.addEventListener('click', clearPixelGrid);
   deleteBtn.addEventListener('click', handleNoteDelete);
+  window.addEventListener('resize', () => handleHexResize('.hex-container', hexes));
 
   renderPixelGrid();
   getAndRenderHive();
@@ -360,7 +375,8 @@ if (window.location.pathname === '/cells') {
 }
 
 else {
-  getNotes().then((notes) => generateHexGrid(14,6, notes, true));
+  window.addEventListener('resize', () => handleHexResize('body', hexes, false, false));
+  getNotes().then((notes) => handleHexResize('body', notes, false, false));
 }
 
 // animate logo when user hovers over it
