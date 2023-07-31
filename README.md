@@ -34,3 +34,7 @@ Users may do the following:
 - Font: Silkscreen by [Jason Kottke](https://www.1001fonts.com/silkscreen-font.html)
 - Hexagon SVG points by [Chris Manning](https://codepen.io/cwmanning/pen/MWeOYR)
 - Pixel Bee logo by me
+
+## License
+
+This project is made under the [MIT License](./LICNESE).
