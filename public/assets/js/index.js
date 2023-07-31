@@ -108,7 +108,6 @@ const handleNoteSave = () => {
   };
   saveNote(newNote).then(() => {
     getAndRenderHive();
-    //getAndRenderNotes();
     renderActiveNote();
   });
 };
@@ -128,8 +127,6 @@ const handleNoteDelete = () => {
 // Sets the activeNote and displays it
 const handleNoteView = (e) => {
   e.preventDefault();
-  // e.stopPropagation();
-  // const li = (e.target.matches('.list-group-item')) ? e.target : e.target.parentElement;
   const cell = e.currentTarget;
   activeNote = JSON.parse(cell.getAttribute('data-note'));
   renderActiveNote();
@@ -151,7 +148,7 @@ const handleRenderSaveBtn = () => {
 
 // Render the list of note titles
 const renderNoteList = async (notes) => {
-  let jsonNotes = notes; //await notes.json();
+  let jsonNotes = notes;
   if (window.location.pathname === '/cells') {
     noteList.forEach((el) => (el.innerHTML = ''));
   }
@@ -334,8 +331,6 @@ function generateHexGrid(columns, rows, cellsArray=[], fillRandom=false) {
   hexColumns.forEach(hc => hexGrid.appendChild(hc));
 }
 
-// const getAndRenderNotes = () => getNotes().then(renderNoteList);
-
 // Gets cells from the db and renders them to the sidebar
 const getAndRenderHive = () => getNotes().then((notes) => handleHexResize('.hex-container', notes));
 
@@ -371,7 +366,6 @@ if (window.location.pathname === '/cells') {
 
   renderPixelGrid();
   getAndRenderHive();
-  //getAndRenderNotes();
 }
 
 else {
