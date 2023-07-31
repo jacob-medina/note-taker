@@ -48,6 +48,10 @@ nav {
   color: var(--dark);
 }
 
+.navbar-brand span {
+  display: none;
+}
+
 .center-card {
   background-color: var(--light);
 }
@@ -155,7 +159,7 @@ a[role=button]:hover {
   display: grid;
   grid-template-columns: repeat(8, var(--pixel-size));
 
-  transform: scale(0.75);
+  /* transform: scale(0.75); */
 }
 
 .pixel {
@@ -210,7 +214,7 @@ a[role=button]:hover {
 
 .hex-col:nth-child(even) {
   position: relative;
-  top: 25px;
+  top: 30px;
 }
 
 .hex {
@@ -278,9 +282,15 @@ a[role=button]:hover {
   color: black;
 }
 
-@media screen and (min-width: 576px) {
+/* @media screen and (min-width: 576px) {
   .pixel-grid {
     transform: scale(1);
+  }
+} */
+
+@media screen and (min-width: 330px) {
+  .navbar-brand span {
+    display: block;
   }
 }
 
