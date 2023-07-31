@@ -37,4 +37,4 @@ Users may do the following:
 
 ## License
 
-This project is made under the [MIT License](./LICNESE).
+This project is made under the [MIT License](./LICENSE).
