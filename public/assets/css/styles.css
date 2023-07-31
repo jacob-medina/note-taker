@@ -201,7 +201,7 @@ a[role=button]:hover {
 .hex-grid-absolute {
   position: absolute;
   left: 0;
-  top: 30px;
+  top: 15px;
   z-index: -1;
 }
 

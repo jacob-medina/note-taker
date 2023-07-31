@@ -349,7 +349,6 @@ function handleHexResize(containerSelector, data, contain=true) {
   const hexColWidth = 120;
   const columns = contain ? Math.max(1, Math.floor(containerWidth / hexColWidth)) : (Math.ceil(containerWidth / hexColWidth) + 2);
   const rows = Math.max(Math.ceil((data.length + 1) / columns), 8);
-  console.log(columns, previousNumColumns);
   if (columns === previousNumColumns) return;
   previousNumColumns = columns;
   generateHexGrid(columns, rows, data);
