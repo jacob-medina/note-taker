@@ -108,7 +108,7 @@ const handleNoteSave = () => {
     mask: getPixelMask()
   };
   saveNote(newNote).then(() => {
-    getAndRenderHive();
+    getAndRenderHive(false);
     renderActiveNote();
   });
 };
@@ -119,7 +119,7 @@ const handleNoteDelete = () => {
   activeNote = {};
 
   deleteNote(noteId).then(() => {
-    getAndRenderHive();
+    getAndRenderHive(false);
     //getAndRenderNotes();
     renderActiveNote();
   });
@@ -333,7 +333,7 @@ function generateHexGrid(columns, rows, cellsArray=[], fillRandom=false) {
 }
 
 // Gets cells from the db and renders them to the sidebar
-const getAndRenderHive = () => getNotes().then((notes) => handleHexResize('.hex-container', notes));
+const getAndRenderHive = (checkColumns=true) => getNotes().then((notes) => handleHexResize('.hex-container', notes, true, checkColumns));
 
 const drawOrErase = (e) => {
   mouseDown = true;
@@ -343,13 +343,13 @@ const drawOrErase = (e) => {
   }
 }
 
-function handleHexResize(containerSelector, data, contain=true) {
+function handleHexResize(containerSelector, data, contain=true, checkColumns=true) {
   const hexContainer = document.querySelector(containerSelector);
   const containerWidth = hexContainer.getBoundingClientRect().width;  // width of hex grid container
   const hexColWidth = 120;
   const columns = contain ? Math.max(1, Math.floor(containerWidth / hexColWidth)) : (Math.ceil(containerWidth / hexColWidth) + 2);
   const rows = Math.max(Math.ceil((data.length + 1) / columns), 8);
-  if (columns === previousNumColumns) return;
+  if (checkColumns && columns === previousNumColumns) return;
   previousNumColumns = columns;
   generateHexGrid(columns, rows, data);
 }
