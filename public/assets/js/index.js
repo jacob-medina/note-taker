@@ -11,6 +11,7 @@ let hexes;
 
 let mouseDown = false;
 let drawMode = 'draw';
+let previousNumColumns;
 
 
 if (window.location.pathname === '/cells') {
@@ -108,7 +109,6 @@ const handleNoteSave = () => {
   };
   saveNote(newNote).then(() => {
     getAndRenderHive();
-    //getAndRenderNotes();
     renderActiveNote();
   });
 };
@@ -128,8 +128,6 @@ const handleNoteDelete = () => {
 // Sets the activeNote and displays it
 const handleNoteView = (e) => {
   e.preventDefault();
-  // e.stopPropagation();
-  // const li = (e.target.matches('.list-group-item')) ? e.target : e.target.parentElement;
   const cell = e.currentTarget;
   activeNote = JSON.parse(cell.getAttribute('data-note'));
   renderActiveNote();
@@ -151,7 +149,7 @@ const handleRenderSaveBtn = () => {
 
 // Render the list of note titles
 const renderNoteList = async (notes) => {
-  let jsonNotes = notes; //await notes.json();
+  let jsonNotes = notes;
   if (window.location.pathname === '/cells') {
     noteList.forEach((el) => (el.innerHTML = ''));
   }
@@ -334,8 +332,6 @@ function generateHexGrid(columns, rows, cellsArray=[], fillRandom=false) {
   hexColumns.forEach(hc => hexGrid.appendChild(hc));
 }
 
-// const getAndRenderNotes = () => getNotes().then(renderNoteList);
-
 // Gets cells from the db and renders them to the sidebar
 const getAndRenderHive = () => getNotes().then((notes) => handleHexResize('.hex-container', notes));
 
@@ -347,13 +343,16 @@ const drawOrErase = (e) => {
   }
 }
 
-function handleHexResize(containerSelector, data, contain=true, fillRandom=false) {
+function handleHexResize(containerSelector, data, contain=true) {
   const hexContainer = document.querySelector(containerSelector);
   const containerWidth = hexContainer.getBoundingClientRect().width;  // width of hex grid container
   const hexColWidth = 120;
   const columns = contain ? Math.max(1, Math.floor(containerWidth / hexColWidth)) : (Math.ceil(containerWidth / hexColWidth) + 2);
   const rows = Math.max(Math.ceil((data.length + 1) / columns), 8);
-  generateHexGrid(columns, rows, data, fillRandom);
+  console.log(columns, previousNumColumns);
+  if (columns === previousNumColumns) return;
+  previousNumColumns = columns;
+  generateHexGrid(columns, rows, data);
 }
 
 if (window.location.pathname === '/cells') {
@@ -371,12 +370,17 @@ if (window.location.pathname === '/cells') {
 
   renderPixelGrid();
   getAndRenderHive();
-  //getAndRenderNotes();
 }
 
 else {
-  window.addEventListener('resize', () => handleHexResize('body', hexes, false, false));
-  getNotes().then((notes) => handleHexResize('body', notes, false, false));
+  const randMasks = Array(112).fill(0).map(() => {
+    let obj = new Object();
+    obj.mask = getRandomMask();
+    return obj;
+  }); // get 120 random masks
+
+  window.addEventListener('resize', () => handleHexResize('body', hexes.concat(randMasks.slice(0, 112 - hexes.length)), false));
+  getNotes().then((notes) => handleHexResize('body', notes.concat(randMasks.slice(0, 112 - notes.length)), false));
 }
 
 // animate logo when user hovers over it

@@ -4,7 +4,7 @@
 
 [Click here to visit the live website.](https://pixelbee-cad6c3eb77b1.herokuapp.com/)
 
-A beehive themed pixel art drawing board that allows the whole world to pitch in.
+A community pixel art drawing board where each drawing fills a cell in the beehive.
 
 ![Home Page Preview](./readme-assets/home-page-preview.png)
 
@@ -14,7 +14,8 @@ The aim of this project is to provide a space for users to anonymously view and 
 
 Users may do the following:
 
-- Click the **"Draw a Cell"** button to be taken the cells page
+- Resize the window to get a layout that is appropriate for the screen dimensions
+- Click the **"Draw a Cell"** button to be taken to the cells page
 
 - Click on a drawn cell to view its contents
 - Click the **"Delete"** button to remove a cell deemed inappropriate
@@ -34,6 +35,7 @@ Users may do the following:
 - Font: Silkscreen by [Jason Kottke](https://www.1001fonts.com/silkscreen-font.html)
 - Hexagon SVG points by [Chris Manning](https://codepen.io/cwmanning/pen/MWeOYR)
 - Pixel Bee logo by me
+
 
 ## License
 
