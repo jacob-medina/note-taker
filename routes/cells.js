@@ -29,6 +29,7 @@ notes.post('/', (req, res) => {
     }
 
     appendJSON('./db/db.json', note);
+    appendJSON('./db/db-backup.json', note);
     res.json('Save successful!');
 });
 
