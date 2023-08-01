@@ -100,6 +100,7 @@ a[role=button]:hover {
 }
 
 .note-title {
+  min-height: 1ch;
   height: 50px;
   margin-top: 13px;
   font-size: 3rem;

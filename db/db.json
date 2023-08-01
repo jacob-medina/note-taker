@@ -138,21 +138,39 @@
         "id": "31a49637-f4e4-4373-bc98-c507b5e7b42e"
     },
     {
-        "title": "h",
-        "text": "h",
-        "mask": "0,128,136,8,136,80,112,0",
-        "id": "64eb2e11-c074-48c9-ae2a-75c87218f599"
+        "title": "Chess Board",
+        "text": "Black or White?",
+        "mask": "85,170,85,170,85,170,85,170",
+        "id": "b24ad675-3253-4ff0-b5cc-5f9d09c780fb"
     },
     {
-        "title": "j",
-        "text": "j",
-        "mask": "128,128,128,136,136,248,0,0",
-        "id": "80102f6b-6ec2-4a61-b978-a1e261af5dc7"
+        "title": "Stairs",
+        "text": "Up & up!",
+        "mask": "255,127,63,31,15,7,3,1",
+        "id": "be5e3756-d574-46b6-bb33-b6ae0924f909"
     },
     {
-        "title": "h",
-        "text": "h",
-        "mask": "0,0,0,64,32,28,0,0",
-        "id": "3c6c1bf0-177d-4d8f-93bf-f656ee3f7939"
+        "title": "BOB",
+        "text": "HE'S JUST HAPPY TO BE HERE",
+        "mask": "0,80,118,2,2,82,112,0",
+        "id": "10dfe4f1-ba0a-4873-86f6-6f5056efd979"
+    },
+    {
+        "title": "STRONG GUY",
+        "text": "HE'S KINDA SQUARE",
+        "mask": "0,48,23,124,124,23,48,0",
+        "id": "631bdeef-5940-45f4-b869-543ba4e90742"
+    },
+    {
+        "title": "NO",
+        "text": "nope.",
+        "mask": "56,16,8,56,0,56,40,56",
+        "id": "79a1cc01-9aaa-4bb0-a16a-a563f91e3138"
+    },
+    {
+        "title": "Twice logo",
+        "text": "Stan twice",
+        "mask": "0,64,124,196,140,4,28,16",
+        "id": "d80b4197-b066-481c-8b81-1ed81b1a2abf"
     }
 ]
