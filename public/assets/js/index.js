@@ -1,214 +1,167 @@
-let noteTitle;
-let noteText;
-let saveNoteBtn;
-let newNoteBtn;
-let noteList;
-let pixelGrid;
+let activeCellTitle;
+let activeCellDesc;
+let saveBtn;
+let newBtn;
 let clearBtn;
 let deleteBtn;
-let navbar = document.querySelector('.navbar-brand');
-let hexes;
+let pixelGrid;
+
+let activeCell = {};  // keep track of the cell's data that's currently being shown
+let hive;  // updated to getCells() results
 
 let mouseDown = false;
 let drawMode = 'draw';
-let previousNumColumns;
 
+let previousNumColumns;  // keeps track of number of hexColumns rendered
 
-if (window.location.pathname === '/cells') {
-  noteTitle = document.querySelector('.note-title');
-  noteText = document.querySelector('.note-textarea');
-  saveNoteBtn = document.querySelector('.save-note');
-  newNoteBtn = document.querySelector('.new-note');
-  noteList = document.querySelectorAll('.list-container .list-group');
-  pixelGrid = document.querySelector('.pixel-grid');
-  clearBtn = document.querySelector('.clear-btn');
-  deleteBtn = document.querySelector('.delete-btn');
-}
 
 // Show an element
-const show = (elem) => {
+function show(elem) {
   elem.style.display = 'inline';
 };
 
 // Hide an element
-const hide = (elem) => {
+function hide(elem) {
   elem.style.display = 'none';
 };
 
-// activeNote is used to keep track of the note in the textarea
-let activeNote = {};
 
-const getNotes = () =>
-  fetch('/api/cells', {
+function getCells() {
+  return fetch('/api/cells', {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
     },
   })
-  .then(data => data.json())
+  .then(res => res.json())
   .then(data => {
-    hexes = data;
+    hive = data;
     return data;
   });
+}
 
-const saveNote = (note) =>
-  fetch('/api/cells', {
+function saveCell(cellData) {
+  const dataJSON = JSON.stringify(cellData);
+
+  return fetch('/api/cells', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(note),
+    body: dataJSON
   });
+  
+}
 
-const deleteNote = (id) =>
-  fetch(`/api/cells/${id}`, {
+function deleteCell(cellID) {
+  return fetch(`/api/cells/${cellID}`, {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',
     },
   });
+}
 
-const deleteActiveNote = () => deleteNote(activeNote.id);
-const clearPixelGrid = () => renderPixelGrid('0,0,0,0,0,0,0,0');
-
-const renderActiveNote = () => {
-  hide(saveNoteBtn);
+function renderActiveCell() {
+  hide(saveBtn);
   
   // if note exists
-  if (activeNote.id) {
-    noteTitle.setAttribute('readonly', true);
-    noteText.setAttribute('readonly', true);
+  if (activeCell.id) {
+    activeCellTitle.setAttribute('readonly', true);
+    activeCellDesc.setAttribute('readonly', true);
     pixelGrid.classList.add('readonly');
-    noteTitle.value = activeNote.title;
-    noteText.value = activeNote.text;
+    activeCellTitle.value = activeCell.title;
+    activeCellDesc.value = activeCell.text;
     show(deleteBtn);
     hide(clearBtn);
-    renderPixelGrid(activeNote.mask);
-
+    renderPixelGrid(activeCell.mask);
   }
   
   // if new note
   else {
-    noteTitle.removeAttribute('readonly');
-    noteText.removeAttribute('readonly');
+    activeCellTitle.removeAttribute('readonly');
+    activeCellDesc.removeAttribute('readonly');
     pixelGrid.classList.remove('readonly');
-    noteTitle.value = '';
-    noteText.value = '';
+    activeCellTitle.value = '';
+    activeCellDesc.value = '';
     show(clearBtn);
     hide(deleteBtn);
     renderPixelGrid();
-
   }
 };
 
-const handleNoteSave = () => {
-  const newNote = {
-    title: noteTitle.value,
-    text: noteText.value,
-    mask: getPixelMask()
+// save the active cell to db
+function handleCellSave() {
+  const newCell = {
+    title: activeCellTitle.value,
+    text: activeCellDesc.value,
+    mask: pixelGridToMask()
   };
-  saveNote(newNote).then(() => {
+
+  saveCell(newCell)
+  .then(() => {
     getAndRenderHive(false);
-    renderActiveNote();
+    renderActiveCell();
   });
 };
 
-// Delete the clicked note
-const handleNoteDelete = () => {
-  const noteId = activeNote.id
-  activeNote = {};
+// Delete the active cell from db
+function handleCellDelete() {
+  const cellID = activeCell.id
+  activeCell = {};
 
-  deleteNote(noteId).then(() => {
+  deleteCell(cellID)
+  .then(() => {
     getAndRenderHive(false);
-    //getAndRenderNotes();
-    renderActiveNote();
+    renderActiveCell();
   });
 };
 
-// Sets the activeNote and displays it
-const handleNoteView = (e) => {
+// Sets the activeCell and displays it
+function handleCellView(e) {
   e.preventDefault();
+
   const cell = e.currentTarget;
-  activeNote = JSON.parse(cell.getAttribute('data-note'));
-  renderActiveNote();
+  activeCell = JSON.parse(cell.getAttribute('data-cell'));
+  renderActiveCell();
 };
 
-// Sets the activeNote to and empty object and allows the user to enter a new note
-const handleNewNoteView = (e) => {
-  activeNote = {};
-  renderActiveNote();
+// Sets the activeCell to and empty object and allows the user to enter a new cell
+function handleNewCellView() {
+  activeCell = {};
+  renderActiveCell();
 };
 
-const handleRenderSaveBtn = () => {
-  if (!noteTitle.value.trim() || !noteText.value.trim() || noteTitle.getAttribute('readonly') || noteText.getAttribute('readonly') || (document.querySelector('.pixel.on') === null)) {
-    hide(saveNoteBtn);
+function handleRenderSaveBtn() {
+  if (!activeCellTitle.value.trim() || !activeCellDesc.value.trim() || activeCellTitle.getAttribute('readonly') || activeCellDesc.getAttribute('readonly') || (document.querySelector('.pixel.on') === null)) {
+    hide(saveBtn);
   } else {
-    show(saveNoteBtn);
+    show(saveBtn);
   }
 };
 
-// Render the list of note titles
-const renderNoteList = async (notes) => {
-  let jsonNotes = notes;
-  if (window.location.pathname === '/cells') {
-    noteList.forEach((el) => (el.innerHTML = ''));
-  }
-
-  let noteListItems = [];
-
-  // Returns HTML element with or without a delete button
-  const createLi = (text, delBtn = true) => {
-    const liEl = document.createElement('li');
-    liEl.classList.add('list-group-item');
-
-    const spanEl = document.createElement('span');
-    spanEl.classList.add('list-item-title');
-    spanEl.innerText = text;
-    liEl.addEventListener('click', handleNoteView);
-
-    liEl.append(spanEl);
-
-    if (delBtn) {
-      const delBtnEl = document.createElement('i');
-      delBtnEl.classList.add(
-        'fas',
-        'fa-trash-alt',
-        'float-right',
-        'text-danger',
-        'delete-note'
-      );
-      delBtnEl.addEventListener('click', handleNoteDelete);
-
-      liEl.append(delBtnEl);
-    }
-
-    return liEl;
-  };
-
-  if (jsonNotes.length === 0) {
-    noteListItems.push(createLi('No saved Notes', false));
-  }
-
-  jsonNotes.forEach((note) => {
-    const li = createLi(note.title);
-    li.dataset.note = JSON.stringify(note);
-
-    noteListItems.push(li);
+// convert base-10 mask to binary grid
+function maskToGrid(mask) {
+  const columns = mask.split(',');
+  const grid = columns.map(num => {
+    let bit = Number(num).toString(2);  // decimal -> bit
+    bit = bit.padStart(8, '0');  // ensure there are 8 bits in each column
+    return bit;
   });
+  return grid;
+}
 
-  if (window.location.pathname === '/cells') {
-    noteListItems.forEach((note) => noteList[0].append(note));
-  }
-};
-
+// render pixel grid, blank or with a given mask
 function renderPixelGrid(mask) {
-  pixelGrid.textContent = '';
+  pixelGrid.textContent = '';  // clear pixel grid
+  
   let grid;
   if (mask) grid = maskToGrid(mask);
 
   for (let col = 0; col < 8; col++) {
     const pixelCol = document.createElement('div');
     pixelCol.classList.add('pixel-col');
+
     for (let row = 0; row < 8; row++) {
       const pixel = document.createElement('div');
       pixel.classList.add('pixel');
@@ -217,41 +170,50 @@ function renderPixelGrid(mask) {
       }
       pixelCol.appendChild(pixel);
     }
+
     pixelGrid.appendChild(pixelCol);
   }
 }
 
-function maskToGrid(mask) {
-  return mask.split(',').map(num => Number(num).toString(2).padStart(8, '0'));
+function clearPixelGrid() {
+  renderPixelGrid('0,0,0,0,0,0,0,0'); 
 }
 
-function handlePixelGrid(event) {
+
+// handles drawing on the pixel grid
+function handlePixelGridDraw(event) {
   event.stopPropagation();
 
   if (pixelGrid.matches('.readonly')) return;
+
   handleRenderSaveBtn();
-  if (!event.target.matches('.pixel') || (!mouseDown && event.type !== 'click')) return;
+
+  const notClickOrDrag = (!mouseDown && event.type !== 'click');
+  if (!event.target.matches('.pixel') || notClickOrDrag) return;
+
   const pixel = event.target;
   if (drawMode === 'draw') pixel.classList.add('on');
   else pixel.classList.remove('on');
 }
 
-function getPixelMask() {
-  let mask = "";
-  var pixelCol = document.querySelectorAll('.pixel-col');
+// returns the bit mask of the pixel grid
+function pixelGridToMask() {
+  let mask = [];
+  var pixelColumns = document.querySelectorAll('.pixel-col');
 
-  [...pixelCol].forEach(pc => {
-    let col = "";
-    [...pc.children].forEach(pixel => {
-      col += pixel.classList.contains('on') ? "1" : "0";
+  [...pixelColumns].forEach(pixelCol => {
+    let colBits = "";
+
+    [...pixelCol.children].forEach(pixel => {
+      const bit = pixel.classList.contains('on') ? "1" : "0";
+      colBits += bit;
     });
-    col = parseInt(col, 2);  // convert to decimal
-    mask += col + ',';
+
+    colBits = parseInt(colBits, 2);  // bit -> decimal
+    mask.push(colBits);
   });
 
-  mask = mask.slice(0, -1);  // remove last comma
-
-  return mask;
+  return mask.join(',');
 }
 
 function getRandomMask() {
@@ -262,7 +224,7 @@ function getRandomMask() {
   return mask.join(",");
 }
 
-function generateHexGrid(columns, rows, cellsArray=[], fillRandom=false) {
+function generateHive(columns, rows, cellsArray=[], fillRandom=false) {
   const drawFromMask = (mask) => {
     const step = 60 / 8;
     const grid = maskToGrid(mask);
@@ -279,7 +241,8 @@ function generateHexGrid(columns, rows, cellsArray=[], fillRandom=false) {
     return svg;
   }
 
-  const emptyOrRandomMask = (random=true) => random ? getRandomMask() : "0,0,0,0,0,0,0,0";
+  const emptyOrRandomMask = (random=true) => 
+    random ? getRandomMask() : "0,0,0,0,0,0,0,0";
 
   let cellsArrayIndex = 0;
 
@@ -301,16 +264,16 @@ function generateHexGrid(columns, rows, cellsArray=[], fillRandom=false) {
     
     let mask;
     if (cellsArray[i]) {
-      hex.setAttribute('data-note', JSON.stringify(cellsArray[i]));
+      hex.setAttribute('data-cell', JSON.stringify(cellsArray[i]));
       hex.setAttribute('data-title', cellsArray[i].title);
       mask = cellsArray[i].mask ?? emptyOrRandomMask(fillRandom);
-      hex.addEventListener('click', handleNoteView);
+      hex.addEventListener('click', handleCellView);
     }
 
     else {
       mask = emptyOrRandomMask(fillRandom);
       hex.setAttribute('data-title', "New Cell");
-      hex.addEventListener('click', handleNewNoteView)
+      hex.addEventListener('click', handleNewCellView)
     }
 
     hex.innerHTML =
@@ -333,60 +296,103 @@ function generateHexGrid(columns, rows, cellsArray=[], fillRandom=false) {
 }
 
 // Gets cells from the db and renders them to the sidebar
-const getAndRenderHive = (checkColumns=true) => getNotes().then((notes) => handleHexResize('.hex-container', notes, true, checkColumns));
+function getAndRenderHive(checkColumns=true) {
+  getCells()
+  .then((cells) => 
+    handleHiveResize('.hex-container', cells, checkColumns));
+};
 
-const drawOrErase = (e) => {
+function drawOrErase(e) {
   mouseDown = true;
-  if (e.target.matches('.pixel')) {
-    if (e.target.classList.contains('on')) drawMode = 'erase';
-    else drawMode = 'draw';
-  }
+
+  if (!e.target.matches('.pixel')) return
+
+  if (e.target.classList.contains('on')) drawMode = 'erase';
+  else drawMode = 'draw';
 }
 
-function handleHexResize(containerSelector, data, contain=true, checkColumns=true) {
+function handleHiveResize(containerSelector, data, checkColumns=true) {
   const hexContainer = document.querySelector(containerSelector);
   const containerWidth = hexContainer.getBoundingClientRect().width;  // width of hex grid container
   const hexColWidth = 120;
-  const columns = contain ? Math.max(1, Math.floor(containerWidth / hexColWidth)) : (Math.ceil(containerWidth / hexColWidth) + 2);
-  const rows = Math.max(Math.ceil((data.length + 1) / columns), 8);
-  if (checkColumns && columns === previousNumColumns) return;
-  previousNumColumns = columns;
-  generateHexGrid(columns, rows, data);
+  const numColumns = Math.max(1, Math.floor(containerWidth / hexColWidth));
+  const rows = Math.max(Math.ceil((data.length + 1) / numColumns), 8);
+
+  if (checkColumns && numColumns === previousNumColumns) return;
+
+  previousNumColumns = numColumns;
+  generateHive(numColumns, rows, data);
 }
 
-if (window.location.pathname === '/cells') {
-  saveNoteBtn.addEventListener('click', handleNoteSave);
-  newNoteBtn.addEventListener('click', handleNewNoteView);
-  noteTitle.addEventListener('keyup', handleRenderSaveBtn);
-  noteText.addEventListener('keyup', handleRenderSaveBtn);
-  window.addEventListener('mousedown', drawOrErase);
-  window.addEventListener('mouseup', () => {mouseDown = false});
-  pixelGrid.addEventListener('mousemove', handlePixelGrid);
-  pixelGrid.addEventListener('click', handlePixelGrid);
-  clearBtn.addEventListener('click', clearPixelGrid);
-  deleteBtn.addEventListener('click', handleNoteDelete);
-  window.addEventListener('resize', () => handleHexResize('.hex-container', hexes));
+function handleHiveBgResize(containerSelector, data) {
+  const hexContainer = document.querySelector(containerSelector);
+  const containerWidth = hexContainer.getBoundingClientRect().width;  // width of hex grid container
+  const containerHeight = hexContainer.getBoundingClientRect().height;  // height of hex grid container
+  const hexColWidth = 120;
+  const numColumns = Math.ceil(containerWidth / hexColWidth) + 2;
+  const rows = Math.ceil(containerHeight / hexColWidth) + 2;
 
-  renderPixelGrid();
-  getAndRenderHive();
+  if (numColumns <= previousNumColumns) return;
+
+  previousNumColumns = numColumns;
+  generateHive(numColumns, rows, data);
 }
 
-else {
-  const randMasks = Array(112).fill(0).map(() => {
-    let obj = new Object();
-    obj.mask = getRandomMask();
-    return obj;
-  }); // get 120 random masks
+function init(pathname) {
+  const navbar = document.querySelector('.navbar-brand');
+  const logo = document.querySelector('.navbar img');
 
-  window.addEventListener('resize', () => handleHexResize('body', hexes.concat(randMasks.slice(0, 112 - hexes.length)), false));
-  getNotes().then((notes) => handleHexResize('body', notes.concat(randMasks.slice(0, 112 - notes.length)), false));
+  // animate logo when user hovers over it
+  navbar.addEventListener('mouseenter', () => {
+    logo.setAttribute('src', './assets/images/pixelbee-logo-anim.gif');
+  });
+
+  navbar.addEventListener('mouseleave', () => {
+    logo.setAttribute('src', './assets/images/pixelbee-logo.png');
+  });
+
+  if (pathname === '/cells') {
+    // select popular elements
+    activeCellTitle = document.querySelector('.note-title');
+    activeCellDesc = document.querySelector('.note-textarea');
+    saveBtn = document.querySelector('.save-note');
+    newBtn = document.querySelector('.new-note');
+    pixelGrid = document.querySelector('.pixel-grid');
+    clearBtn = document.querySelector('.clear-btn');
+    deleteBtn = document.querySelector('.delete-btn');
+
+    // add all event listeners
+    saveBtn.addEventListener('click', handleCellSave);
+    newBtn.addEventListener('click', handleNewCellView);
+    activeCellTitle.addEventListener('keyup', handleRenderSaveBtn);
+    activeCellDesc.addEventListener('keyup', handleRenderSaveBtn);
+    window.addEventListener('mousedown', drawOrErase);
+    window.addEventListener('mouseup', () => {mouseDown = false});
+    pixelGrid.addEventListener('mousemove', handlePixelGridDraw);
+    pixelGrid.addEventListener('click', handlePixelGridDraw);
+    clearBtn.addEventListener('click', clearPixelGrid);
+    deleteBtn.addEventListener('click', handleCellDelete);
+    window.addEventListener('resize', () => handleHiveResize('.hex-container', hive));
+
+    getAndRenderHive();
+    renderPixelGrid();
+  }
+
+  else {    
+    let randMasks = [];
+    
+    getCells().
+    then((cells) => {
+      randMasks = Array(112 - cells.length).fill(0).map(() => {
+        let obj = new Object();
+        obj.mask = getRandomMask();
+        return obj;
+      });
+      handleHiveBgResize('body', cells.concat(randMasks));
+    });
+
+    window.addEventListener('resize', () => handleHiveBgResize('body', hive.concat(randMasks)));
+  }
 }
 
-// animate logo when user hovers over it
-navbar.addEventListener('mouseenter', () => {
-  document.querySelector('.navbar img').setAttribute('src', './assets/images/pixelbee-logo-anim.gif');
-});
-
-navbar.addEventListener('mouseleave', () => {
-  document.querySelector('.navbar img').setAttribute('src', './assets/images/pixelbee-logo.png');
-});
+init(window.location.pathname);
